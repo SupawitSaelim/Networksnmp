@@ -5,6 +5,62 @@ import asyncio
 
 app = Flask(__name__)
 
+async def get_operational_status(target_ip, community_string, operational_status_oid):
+    slim = Slim(1)
+    errorIndication, errorStatus, errorIndex, varBinds = await slim.get(
+        community_string,
+        target_ip,
+        161,
+        ObjectType(ObjectIdentity(operational_status_oid))
+    )
+
+    if errorIndication:
+        return "Error"
+    elif errorStatus:
+        return "Error"
+    else:
+        return varBinds[0][1].prettyPrint()
+
+async def get_interface_data(target_ip, community_string):
+    slim = Slim(1)
+    interface_data = []
+
+    # Define OIDs for the known 6 ports
+    interface_oids = [
+        "1.3.6.1.2.1.2.2.1.2.2",
+        "1.3.6.1.2.1.2.2.1.2.3",
+        "1.3.6.1.2.1.2.2.1.2.4",
+        "1.3.6.1.2.1.2.2.1.2.5",
+    ]
+
+    operational_status_oid_base = "1.3.6.1.2.1.2.2.1.8."
+
+    for index in range(1, 5):  # Generate OIDs for ports 1 through 6
+        port_oid = operational_status_oid_base + str(index)
+        operational_status = await get_operational_status(target_ip, community_string, port_oid)
+        
+        # Fetch the interface name from the results of the get request
+        next_oid = ObjectType(ObjectIdentity(interface_oids[index - 1]))
+        errorIndication, errorStatus, errorIndex, varBinds = await slim.get(
+            community_string,
+            target_ip,
+            161,
+            next_oid
+        )
+        
+        if errorIndication:
+            return errorIndication
+        elif errorStatus:
+            return "{} at {}".format(
+                errorStatus.prettyPrint(),
+                errorIndex and varBinds[int(errorIndex) - 1][0] or "?",
+            )
+        else:
+            interface_name = varBinds[0][1].prettyPrint()
+            interface_data.append((interface_name, operational_status))
+
+    return interface_data
+
 async def get_snmp_data(target_ip, community_string):
     slim = Slim(1)
 
@@ -52,9 +108,10 @@ async def get_snmp_data(target_ip, community_string):
         }
         return result
 
+
 @app.route('/')
 def index():
-    return render_template('index.html', snmp_data=None)
+    return render_template('index.html', snmp_data=None, interface_data=None)
 
 @app.route('/ip_address', methods=['GET', 'POST'])
 def get_ip_address():
@@ -62,7 +119,8 @@ def get_ip_address():
         target_ip = request.form['ip_address']
         community_string = 'public'  # You can change this to the appropriate community string
         snmp_data = asyncio.run(get_snmp_data(target_ip, community_string))
-        return render_template('index.html', snmp_data=snmp_data)
+        interface_data = asyncio.run(get_interface_data(target_ip, community_string))
+        return render_template('index.html', snmp_data=snmp_data, interface_data=interface_data)
     return redirect(url_for('index'))
 
 if __name__ == '__main__':

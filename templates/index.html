@@ -28,6 +28,14 @@
                 <h2>SysUpTime</h2>
                 <p>{{ snmp_data.SysUpTime }}</p>
             </div>
+            {% if interface_data %}
+                <h3>Interface Data:</h3>
+                <ul>
+                    {% for interface, status in interface_data %}
+                    <li>{{ interface }} - Status: {% if status == "2" %}Down{% else %}Up{% endif %}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
         </div>
     </body>
 </html>

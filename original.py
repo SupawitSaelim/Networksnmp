@@ -6,13 +6,13 @@ async def run():
     slim = Slim(1)
 
     target_ip = '10.4.15.32'
-    community_string = 'public'
+    community_string = 'private'
 
     errorIndication, errorStatus, errorIndex, varBinds = await slim.get(
         community_string,
         target_ip,
         161,
-        ObjectType(ObjectIdentity("SNMPv2-MIB", "sysName", 0)),
+        ObjectType(ObjectIdentity("1.3.6.1.2.1.2.2.1.2.1")),
     )
 
     if errorIndication:
