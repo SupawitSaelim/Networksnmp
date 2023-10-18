@@ -2,12 +2,13 @@ from flask import Flask, render_template, request, redirect, url_for
 from pysnmp.hlapi.asyncio.slim import Slim
 from pysnmp.smi.rfc1902 import ObjectIdentity, ObjectType
 import asyncio
+import subprocess
 
 app = Flask(__name__)
 
 port_status = {}
 port_oids = {}
-
+target_ip = ''
 
 async def get_operational_status(target_ip, community_string, port_oid):
     slim = Slim(1)
@@ -112,6 +113,7 @@ def index():
 @app.route('/ip_address', methods=['GET', 'POST'])
 def get_ip_address():
     if request.method == 'POST':
+        global target_ip
         target_ip = request.form['ip_address']
         community_string = 'public'  # You can change this to the appropriate community string
         snmp_data = asyncio.run(get_snmp_data(target_ip, community_string))
@@ -124,11 +126,25 @@ def control_port():
     if request.method == 'POST':
         interface_name = request.form['interface_name']
         action = request.form['action']
+        global target_ip
+        #OID for port FastEthernet0/7: 1.3.6.1.2.1.2.2.1.8.10007
+        #snmpset -v1 -c private 10.4.15.31 IF-MIB::ifAdminStatus.1 i 1
         
         print("OID for port {}: {}".format(interface_name, port_oids[interface_name]))
         
         port_status[interface_name] = action
+        if action == 'on':
+            action = 1
+        elif action == 'off':
+            action = 2
+
         
+        command = 'snmpset -v1 -c private {} IF-MIB::ifAdminStatus.{} i {}'.format(target_ip, port_oids[interface_name].split('.')[-1], action)
+        print(command)
+        result = subprocess.run(command, shell=True, capture_output=True)
+        print(result)
+        print(result.stdout)
+        print(result.stderr)
         return redirect(url_for('index'))
 
 
