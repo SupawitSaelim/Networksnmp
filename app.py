@@ -11,27 +11,41 @@ async def get_snmp_data():
     target_ip = '10.4.15.32'
     community_string = 'public'
 
-    errorIndication, errorStatus, errorIndex, varBinds = await slim.get(
+    # Retrieve sysUpTime
+    errorIndication1, errorStatus1, errorIndex1, varBinds1 = await slim.get(
         community_string,
         target_ip,
         161,
         ObjectType(ObjectIdentity("SNMPv2-MIB", "sysUpTime", 0)),
     )
 
-    if errorIndication:
-        return errorIndication
-    elif errorStatus:
+    # Retrieve sysDescr
+    errorIndication2, errorStatus2, errorIndex2, varBinds2 = await slim.get(
+        community_string,
+        target_ip,
+        161,
+        ObjectType(ObjectIdentity("SNMPv2-MIB", "sysDescr", 0)),
+    )
+
+    if errorIndication1 or errorIndication2:
+        return errorIndication1 or errorIndication2
+    elif errorStatus1 or errorStatus2:
         return "{} at {}".format(
-            errorStatus.prettyPrint(),
-            errorIndex and varBinds[int(errorIndex) - 1][0] or "?",
+            errorStatus1.prettyPrint(),
+            errorIndex1 and varBinds1[int(errorIndex1) - 1][0] or "?",
         )
     else:
-        sys_up_time = int(varBinds[0][1])
+        sys_up_time = int(varBinds1[0][1])
+        sys_descr = varBinds2[0][1].prettyPrint()
+        
         seconds = sys_up_time // 100
         minutes = seconds // 60
         hours = minutes // 60
 
-        result = f"{hours:02}:{minutes % 60:02}:{seconds % 60:02}"
+        result = {
+            "SysUpTime": f"{hours:02}:{minutes % 60:02}:{seconds % 60:02}",
+            "SysDescr": sys_descr
+        }
         return result
 
 @app.route('/')

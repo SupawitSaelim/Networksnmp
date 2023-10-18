@@ -1,20 +1,26 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>SNMP Data</title>
-    <link rel="stylesheet" type="text/css" href="/static/style.css">
-    <style>
-        .snmp-data {
-            font-size: 20px;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-    <h1>SNMP Data</h1>
-    <div class="snmp-data">
-        <h2>SysUpTime</h2>
-        <p>{{ snmp_data }}</p>
-    </div>
-</body>
+    <head>
+        <title>SNMP Data</title>
+        <link rel="stylesheet" type="text/css" href="/static/style.css">
+        <style>
+            .snmp-data {
+                font-size: 20px;
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>SNMP Data</h1>
+        <div class="snmp-data">
+            <div class="sysuptime">
+                <h2>SysUpTime</h2>
+                <p>{{ snmp_data.SysUpTime }}</p>
+            </div>
+            <div class="sysdescr">
+                <h2>SysDescr</h2>
+                <p>{{ snmp_data.SysDescr | safe }}</p>
+            </div>
+        </div>
+    </body>
 </html>
