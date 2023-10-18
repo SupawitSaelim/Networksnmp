@@ -11,19 +11,22 @@
         </style>
     </head>
     <body>
-        <h1 style="text-align: center;">SNMP Data</h1>
-        <form action="/ip_address" method="post">
-            <input type="text" name="ip_address" id="ip_address">
-            <input type="submit" value="Submit">
-        </form><br><br>
         <div class="snmp-data">
-            <div class="sysuptime">
-                <h2>SysUpTime</h2>
-                <p>{{ snmp_data.SysUpTime }}</p>
+            <form action="/ip_address" method="post">
+                <input type="text" name="ip_address" id="ip_address">
+                <input type="submit" value="Submit">
+            </form><br><br>
+            <div class="sysdescr">
+                <h2>Device Name: </h2>
+                <p>{{ snmp_data.SysName | safe }}</p>
             </div>
             <div class="sysdescr">
                 <h2>SysDescr</h2>
                 <p>{{ snmp_data.SysDescr | safe }}</p>
+            </div>
+            <div class="sysuptime">
+                <h2>SysUpTime</h2>
+                <p>{{ snmp_data.SysUpTime }}</p>
             </div>
         </div>
     </body>

@@ -21,10 +21,17 @@ async def get_snmp_data(target_ip, community_string):
         161,
         ObjectType(ObjectIdentity("SNMPv2-MIB", "sysDescr", 0)),
     )
+    
+    errorIndication3, errorStatus3, errorIndex3, varBinds3 = await slim.get(
+        community_string,
+        target_ip,
+        161,
+        ObjectType(ObjectIdentity("SNMPv2-MIB", "sysName", 0)),
+    )
 
-    if errorIndication1 or errorIndication2:
-        return errorIndication1 or errorIndication2
-    elif errorStatus1 or errorStatus2:
+    if errorIndication1 or errorIndication2 or errorIndication3:
+        return errorIndication1 or errorIndication2 or errorIndication3
+    elif errorStatus1 or errorStatus2 or errorStatus3:
         return "{} at {}".format(
             errorStatus1.prettyPrint(),
             errorIndex1 and varBinds1[int(errorIndex1) - 1][0] or "?",
@@ -32,6 +39,7 @@ async def get_snmp_data(target_ip, community_string):
     else:
         sys_up_time = int(varBinds1[0][1])
         sys_descr = varBinds2[0][1].prettyPrint()
+        sys_name = varBinds3[0][1].prettyPrint()
         
         seconds = sys_up_time // 100
         minutes = seconds // 60
@@ -39,7 +47,8 @@ async def get_snmp_data(target_ip, community_string):
 
         result = {
             "SysUpTime": f"{hours:02}:{minutes % 60:02}:{seconds % 60:02}",
-            "SysDescr": sys_descr
+            "SysDescr": sys_descr,
+            "SysName": sys_name
         }
         return result
 
@@ -50,7 +59,6 @@ def index():
 @app.route('/ip_address', methods=['GET', 'POST'])
 def get_ip_address():
     if request.method == 'POST':
-        print(request.form['ip_address'])
         target_ip = request.form['ip_address']
         community_string = 'public'  # You can change this to the appropriate community string
         snmp_data = asyncio.run(get_snmp_data(target_ip, community_string))

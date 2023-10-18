@@ -12,7 +12,7 @@ async def run():
         community_string,
         target_ip,
         161,
-        ObjectType(ObjectIdentity("SNMPv2-MIB", "sysUpTime", 0)),
+        ObjectType(ObjectIdentity("SNMPv2-MIB", "sysName", 0)),
     )
 
     if errorIndication:
