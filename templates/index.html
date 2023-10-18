@@ -31,6 +31,56 @@ http://www.tooplate.com/view/2102-constructive
    		renderPage = false;
 	}
 	</script>
+	<style>
+		input[type="submit"] {
+            background-color: darkgrey; /* Background color */
+            color: #fff; /* Text color */
+            padding: 5px 5px; /* Padding for the button */
+            border: none; /* Remove border */
+            border-radius: 4px; /* Rounded corners */
+            cursor: pointer; /* Cursor style on hover */
+			font-size: 16px;
+        }
+
+        input[type="submit"]:hover {
+			transition: 0.3s;
+            background-color: black; /* Background color on hover */
+        }
+		input[type="text"] {
+        width: 30%; /* Make the input box expand to the full width of its container */
+        padding: 5px; /* Padding for the input box */
+        border: 1px solid #ccc; /* Border */
+        border-radius: 4px; /* Rounded corners */
+        font-size: 16px; /* Font size */
+		}
+
+		/* Adjust the focus (when the input is clicked) */
+		input[type="text"]:focus {
+			border-color: #007BFF; /* Change border color on focus */
+		}
+	</style>
+	<style>
+		/* CSS for the buttons */
+		.port-control {
+			padding: 5px 10px;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			font-size: 16px;
+			color: #fff;
+		}
+	
+		/* Style for the "Turn On" button */
+		.port-control.on {
+			background-color: rgb(249, 87, 58) /* Green background for "On" button */
+		}
+	
+		/* Style for the "Turn Off" button */
+		.port-control.off {
+			background-color: rgb(141, 203, 48); /* Red background for "Off" button */
+		}
+	</style>
+	
 </head>
 
 <body>
@@ -54,9 +104,9 @@ http://www.tooplate.com/view/2102-constructive
 					<nav id="tmMainNav" class="tm-main-nav">
 						<ul>
 							<li>
-								<a href="#intro" id="tmNavLink1" class="scrolly active" data-bg-img="constructive_bg_01.jpg" data-page="#tm-section-1">
+								<a href="/" id="tmNavLink1" class="scrolly active" data-bg-img="constructive_bg_01.jpg" data-page="#tm-section-1">
 									<i class="fas fa-home tm-nav-fa-icon"></i>
-									<span>Introduction</span>
+									<span>Welcome !</span>
 								</a>
 							</li>
 							
@@ -71,8 +121,8 @@ http://www.tooplate.com/view/2102-constructive
 					<section id="tm-section-1" class="tm-section">
 						<div class="snmp-data">
 							<form action="/ip_address" method="post">
-								<input type="text" name="ip_address" id="ip_address">
-								<input type="submit" value="Submit">
+								<input type="text" name="ip_address" id="ip_address" style="width: 70%;">
+								<input  style="margin-left: 10px;" type="submit" value="Submit">
 							</form><br><br>
 							<div class="sysdescr">
 								<h2>Device Name: </h2>
@@ -92,7 +142,9 @@ http://www.tooplate.com/view/2102-constructive
 									{% for interface, status in interface_data %}
 									<li>
 										{{ interface }} - Status: {% if status == "2" %}Down{% else %}Up{% endif %}
-										<button class="port-control" data-port="{{ interface }}">{{ 'Turn On' if status == "2" else 'Turn Off' }}</button>
+										<div style="text-align: right;">
+											<button class="port-control {{ 'on' if status != '2' else 'off' }}" data-port="{{ interface }}">{{ 'Turn On' if status == "2" else 'Turn Off' }}</button>
+										</div>
 									</li>
 									{% endfor %}
 								</ul>
@@ -118,27 +170,22 @@ http://www.tooplate.com/view/2102-constructive
 											// Update the button text based on the action
 											if (action === 'on') {
 												$(this).text('Turn Off');
+												window.location.reload();
 											} else {
 												$(this).text('Turn On');
+												window.location.reload();
 											}
 										},
 										error: function() {
 											alert('An error occurred.');
 										}
 										//reload the page
+										// location.reload();
+
 									});
 								});
 							});
 						</script>
-
-
-
-
-
-
-
-
-							
 							<!-- data-nav-link holds the ID of nav item, which means this link should behave the same as that nav item  -->
 						</div>
 					</section>
