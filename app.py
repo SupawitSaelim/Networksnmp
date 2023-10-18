@@ -5,6 +5,10 @@ import asyncio
 
 app = Flask(__name__)
 
+port_status = {}
+port_oids = {}
+
+
 async def get_operational_status(target_ip, community_string, port_oid):
     slim = Slim(1)
     errorIndication, errorStatus, errorIndex, varBinds = await slim.get(
@@ -29,7 +33,6 @@ async def get_interface_data(target_ip, community_string):
         port_oid = "1.3.6.1.2.1.2.2.1.8." + str(port_number)
         operational_status = await get_operational_status(target_ip, community_string, port_oid)
         
-        # Fetch the interface name from the results of the get request
         interface_oid = "1.3.6.1.2.1.2.2.1.2." + str(port_number)
         next_oid = ObjectType(ObjectIdentity(interface_oid))
         errorIndication, errorStatus, errorIndex, varBinds = await slim.get(
@@ -49,6 +52,9 @@ async def get_interface_data(target_ip, community_string):
         else:
             interface_name = varBinds[0][1].prettyPrint()
             interface_data.append((interface_name, operational_status))
+            
+            port_status[interface_name] = operational_status
+            port_oids[interface_name] = port_oid
 
     return interface_data
 
@@ -112,6 +118,18 @@ def get_ip_address():
         interface_data = asyncio.run(get_interface_data(target_ip, community_string))
         return render_template('index.html', snmp_data=snmp_data, interface_data=interface_data)
     return redirect(url_for('index'))
+
+@app.route('/control_port', methods=['POST'])
+def control_port():
+    if request.method == 'POST':
+        interface_name = request.form['interface_name']
+        action = request.form['action']
+        
+        print("OID for port {}: {}".format(interface_name, port_oids[interface_name]))
+        
+        port_status[interface_name] = action
+        
+        return redirect(url_for('index'))
 
 
 if __name__ == '__main__':

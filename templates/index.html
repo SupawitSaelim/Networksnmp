@@ -1,41 +1,75 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>SNMP Data</title>
-        <link rel="stylesheet" type="text/css" href="/static/style.css">
-        <style>
-            .snmp-data {
-                font-size: 20px;
-                text-align: center;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="snmp-data">
-            <form action="/ip_address" method="post">
-                <input type="text" name="ip_address" id="ip_address">
-                <input type="submit" value="Submit">
-            </form><br><br>
-            <div class="sysdescr">
-                <h2>Device Name: </h2>
-                <p>{{ snmp_data.SysName | safe }}</p>
-            </div>
-            <div class="sysdescr">
-                <h2>SysDescr</h2>
-                <p>{{ snmp_data.SysDescr | safe }}</p>
-            </div>
-            <div class="sysuptime">
-                <h2>SysUpTime</h2>
-                <p>{{ snmp_data.SysUpTime }}</p>
-            </div>
-            {% if interface_data %}
-                <h3>Interface Data:</h3>
-                <ul>
-                    {% for interface, status in interface_data %}
-                    <li>{{ interface }} - Status: {% if status == "2" %}Down{% else %}Up{% endif %}</li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        </div>
-    </body>
+<head>
+    <title>SNMP Data</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+    <style>
+        .snmp-data {
+            font-size: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="snmp-data">
+    <form action="/ip_address" method="post">
+        <input type="text" name="ip_address" id="ip_address">
+        <input type="submit" value="Submit">
+    </form><br><br>
+    <div class="sysdescr">
+        <h2>Device Name: </h2>
+        <p>{{ snmp_data.SysName | safe }}</p>
+    </div>
+    <div class="sysdescr">
+        <h2>SysDescr</h2>
+        <p>{{ snmp_data.SysDescr | safe }}</p>
+    </div>
+    <div class="sysuptime">
+        <h2>SysUpTime</h2>
+        <p>{{ snmp_data.SysUpTime }}</p>
+    </div>
+    {% if interface_data %}
+        <h3>Interface Data:</h3>
+        <ul>
+            {% for interface, status in interface_data %}
+            <li>
+                {{ interface }} - Status: {% if status == "2" %}Down{% else %}Up{% endif %}
+                <button class="port-control" data-port="{{ interface }}">{{ 'Turn On' if status == "2" else 'Turn Off' }}</button>
+            </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.port-control').click(function() {
+            const port = $(this).data('port');
+            const action = $(this).text() === 'Turn On' ? 'on' : 'off';
+            const interfaceName = port;
+
+            $.ajax({
+                type: 'POST',
+                url: '/control_port',
+                data: {
+                    interface_name: interfaceName,
+                    action: action
+                },
+                success: function(data) {
+                    // Update the button text based on the action
+                    if (action === 'on') {
+                        $(this).text('Turn Off');
+                    } else {
+                        $(this).text('Turn On');
+                    }
+                },
+                error: function() {
+                    alert('An error occurred.');
+                }
+            });
+        });
+    });
+</script>
+</body>
 </html>
