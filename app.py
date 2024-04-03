@@ -30,7 +30,7 @@ async def get_interface_data(target_ip, community_string):
     slim = Slim(1)
     interface_data = []
 
-    for port_number in range(10001, 10049):  # Generate OIDs for ports 10001 to 10048
+    for port_number in range(1, 16):  # Change the range to the number of ports on your device
         port_oid = "1.3.6.1.2.1.2.2.1.8." + str(port_number)
         operational_status = await get_operational_status(target_ip, community_string, port_oid)
         
