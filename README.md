@@ -1,17 +1,3 @@
-python -m venv venv
-powershell admin : run this commands
-            Get-ExecutionPolicy
-            Set-ExecutionPolicy RemoteSigned
-            [A] Yes to All
-.venv/Scripts/activate
-or 
-source .venv/bin/active
-
-
-pip install flask 
-pip install pysnmp-lextudio
-
-
 # Network Monitoring and Control System
 
 This Python application utilizes Flask and asyncio to create a simple network monitoring and control system using SNMP (Simple Network Management Protocol). The system allows you to monitor the status of network interfaces and control their operational status remotely.
